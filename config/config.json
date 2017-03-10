@@ -1,0 +1,28 @@
+{
+  "development": {
+    "username": "root",
+    "password": "justdoit",
+    "database": "squirtle",
+    "host": "127.0.0.1",
+    "dialect": "mysql",
+      "pool": {
+      "max": 5,
+      "min": 0,
+      "idle": 100
+    }
+  },
+  "test": {
+    "username": "root",
+    "password": "justdoit",
+    "database": "squirtle",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  },
+  "production": {
+    "username": "root",
+    "password": "justdoit",
+    "database": "squirtle",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  }
+}
