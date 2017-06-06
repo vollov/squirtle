@@ -1,0 +1,33 @@
+x-swagger-router-controller: user
+get:
+  operationId: getUsers
+  description: get the users list
+  responses:
+    "200":
+      description: Success
+      schema:
+        $ref: "#/definitions/GetUsersListResponse"
+    default:
+      description: Error
+      schema:
+        $ref: "#/definitions/ErrorResponse"
+post:
+  operationId: saveUser
+  description: add a new user to the list
+  # user info to be stored
+  parameters:
+    - name: username
+      description: user properties
+      in: body
+      required: true
+      schema:
+        $ref: "#/definitions/User"
+  responses:
+    "200":
+      description: Success
+      schema:
+        $ref: "#/definitions/GeneralResponse"
+    default:
+      description: Error
+      schema:
+        $ref: "#/definitions/ErrorResponse"

@@ -7,7 +7,7 @@ const log = bunyan.createLogger(_.extend(cfg.logging, {name: 'user'}));
 
 const models = require('../../models');
 
-function getAll(req, res, next) {
+function getUsers(req, res, next) {
 	
 	models.User.findAll({
 		attributes: [
@@ -23,79 +23,105 @@ function getAll(req, res, next) {
 	.catch((err) => {
 		log.error('encountered database error when get all users %j', err);
 		return res.status(500).json({
-			message : 'database error when getting users'
+			success: 0,
+			description : 'database error when getting users'
 		});
 	});
 }
 
 
-function save(req, res, next) {
+function saveUser(req, res, next) {
 	log.debug('POST user= %j', req.body);
-	var user = new User(req.body);
 
-	user.save(function(err, user) {
-		if (err) {
-			//return next(err);
-			return res.status(500).json({
-				success: db.save(req.body),
-				description:'error when save user to database'
-			});
-		}
-
+	models.User.create(req.body)
+	.then((user) => {
 		log.debug('saved user with id = ' + user.id)
-		res.status(200).json({success: 1,description: "User saved into database!"});
-	});	
+		return res.status(200).json({success: 1,description: "User saved into database!"});
+	}).catch((err) => {
+		log.error('encountered database error when save user %s error=%s', req.body.username, err);
+		return res.status(500).json({
+			success: 0,
+			description:'error when save user to database'
+		});
+	})	
 }
 
-function getOne(req, res, next) {
+function getUserById(req, res, next) {
 	var id = req.swagger.params.id.value;
 	
-	var query = User.findById(id);
-
-	query.exec(function(err, user) {
-		if (err) {
-			return next(err);
-		}
+	models.User.findById(id)
+	.then((user) => {
 		if (!user) {
-			//return next(new Error("can't find user by id"));
-			res.status(200).json({success: 0 ,description: "can't find user by id!"});
+			return res.status(200).json({success: 0 ,description: "can't find user by id!"});
 		}
-		
-		log.debug('GET by id user= %j', user);
-		res.status(200).json(user);
+
+		log.debug('GET user by id = %j', user.id);
+		return res.status(200).json(user);
+	})
+	.catch((err) => {
+		log.error('encountered database error when fetching user by id %s', id);
+		return res.status(500).json({
+			success: 0,
+			description : 'error when find user by id'
+		});
 	});
 }
 
-
-function update(req, res, next) {
+function updateUser(req, res, next) {
 	var id = req.swagger.params.id.value;
 	var body = req.body;
 	
 	delete body._id;
 	log.debug('calling put user =%j', body);
 	
-	User.findByIdAndUpdate(id, { $set: body}, function (err, message) {
-		//if (err) return handleError(err);
-		if(err) return next(err);
-		res.status(200).json({success: 1, description: 'user '+ id +' updated!'});
-	});
-}
-
-function delUser(req, res, next) {
-	var id = req.swagger.params.id.value;
-	var query = User.findById(id).remove();
-	
-	query.exec(function(err, user) {
-		if (err) {
-			return next(err);
-		}
+	models.User.findById(id)
+	.then((user) => {
 		if (!user) {
-			return next(new Error("can't find user"));
+			res.status(200).json({success: 0 ,description: "update - can't find user by id!"});
+		} else {
+			log.debug('Call Update user by id = %j', id);
+			_.assign(user, body);
+			//user.updateAttributes(body);
+			return user.save();
 		}
-		
-		log.debug('DELETE by id user= %j', user);
-		res.status(200).json({success: 1, description: "User " + id + " deleted!"});
+	})
+	.then((user) => {
+		log.debug('user id=%s has been updated', id);
+		return res.status(200).json({success: 1, description: 'user '+ id +' updated!'});
+	})
+	.catch((err) => {
+		log.error('encountered database error when updating user by id=%s', id);
+		return res.status(500).json({
+			success: 0,
+			description : 'database error when update user by id'
+		});
 	});
 }
 
-module.exports = {getAll, save, getOne, update, delUser};
+function deleteUser(req, res, next) {
+	var id = req.swagger.params.id.value;
+	
+	log.debug('HTTP DELETE /resources/%s', id);
+
+	models.User.findById(id)
+	.then((user) =>{
+		if (!user) {
+			return res.status(200).json({success: 0 ,description: "delete - can't find user by id!"});
+		} else {
+			return user.destroy();
+		}
+	})
+	.then(()=> {
+		log.debug('users id=%s has been deleted', id);
+		return res.status(200).json({success: 1, description: 'user '+ id +' deleted!'});
+	})
+	.catch((err) => {
+		log.error('encountered database error when delete user by id, %j', err);
+		return res.status(500).json({
+			success: 0,
+			description : 'database error when update user by id'
+		});
+	});
+}
+
+module.exports = {getUsers, saveUser, getUserById, updateUser, deleteUser};

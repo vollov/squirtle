@@ -4,6 +4,9 @@ var SwaggerExpress = require('swagger-express-mw');
 var app = require('express')();
 module.exports = app; // for testing
 
+const midware = require('./api/midware')
+app.all('*', midware.header);
+
 var config = {
   appRoot: __dirname // required config
 };

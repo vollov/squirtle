@@ -1,0 +1,4 @@
+/user:
+  $ref: ./user.yaml
+/user/{id}:
+  $ref: ./userid.yaml

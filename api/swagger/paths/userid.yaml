@@ -1,0 +1,65 @@
+x-swagger-router-controller: user
+get:
+    operationId: getUserById
+    description: get a user
+    
+    parameters:
+    - name: id
+        type: number
+        in: path
+        required: true
+    responses:
+    "200":
+        description: Success
+        schema:
+        $ref: "#/definitions/GetUserResponse"
+    default:
+        description: Error
+        schema:
+        $ref: "#/definitions/ErrorResponse"
+    
+put:
+    operationId: updateUser
+    description: update a user
+    
+    parameters:
+    - name: id
+        description: User id
+        type: number
+        in: path
+        required: true
+    - name: username
+        description: user name
+        in: body
+        required: true
+        schema:
+        $ref: "#/definitions/User"
+    responses:
+    "200":
+        description: Success
+        schema:
+        $ref: "#/definitions/GeneralResponse"
+    default:
+        description: Error
+        schema:
+        $ref: "#/definitions/ErrorResponse"
+    
+delete:
+    operationId: deleteUser
+    description: delete a user
+    # define the parameters
+    parameters:
+    - name: id
+        description: User id
+        type: number
+        in: path
+        required: true
+    responses:
+    "200":
+        description: Success
+        schema:
+        $ref: "#/definitions/GeneralResponse"
+    default:
+        description: Error
+        schema:
+        $ref: "#/definitions/ErrorResponse"
